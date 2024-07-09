@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini API</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Ekstra stil tanımlamaları */
+        #image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 10px;
+            display: none; /* Başlangıçta gizli olarak ayarlanmış */
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Gemini API</div>
+        <div id="chat-box"></div>
+        <div style="display: flex; align-items: center;">
+            <!-- Resim yükleme inputu ve etiketi -->
+            <input type="file" id="photo-upload" accept="image/*" style="display: none;">
+            <label for="photo-upload" style="cursor: pointer; margin-right: 10px;">
+                <img src="{{url_for('static', filename='images.png')}}" alt="Upload" width="24" height="24">
+            </label>
+            <!-- Resim ön izleme alanı -->
+            <img id="image-preview" src="#" alt="Image Preview" style="display: none;">
+            <!-- Mesaj kutusu ve gönder butonu -->
+            <input type="text" id="message-box" placeholder="Type a message..." style="flex: 1;">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Gönder butonuna tıklama olayı
+        document.getElementById('send-button').addEventListener('click', function() {
+            var message = document.getElementById('message-box').value;
+            var file = document.getElementById('photo-upload').files[0];
+
+            // Eğer sadece mesaj gönderildiyse
+            if (message.trim() !== '' && !file) {
+                sendTextMessage(message);
+            } else {
+                sendMessage(message);
+            }
+        });
+
+        // Resim yükleme inputunda değişiklik olduğunda çalışacak fonksiyon
+        document.getElementById('photo-upload').addEventListener('change', function() {
+            var file = this.files[0];
+            if (!file) return;
+
+            var formData = new FormData();
+            formData.append('photo', file);
+
+            // Resim ön izleme gösterme
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var preview = document.getElementById('image-preview');
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Sadece metin mesajı gönderme fonksiyonu
+        function sendTextMessage(message) {
+            var chatBox = document.getElementById('chat-box');
+
+            // Kullanıcı mesajını göster
+            var userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('message', 'user');
+            userMessageElement.textContent = message;
+            chatBox.appendChild(userMessageElement);
+            document.getElementById('message-box').value = '';
+
+            var formData = new FormData();
+            formData.append('message', message);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/send_message', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Gemini API yanıtını göster
+                    var geminiResponseElement = document.createElement('div');
+                    geminiResponseElement.classList.add('message', 'gemini-response');
+                    geminiResponseElement.textContent = response.gemini_response;
+                    chatBox.appendChild(geminiResponseElement);
+
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            };
+            xhr.send(formData);
+        }
+
+        // Mesajı ve resmi gönderme fonksiyonu
+        function sendMessage(message) {
+            var chatBox = document.getElementById('chat-box');
+            
+            // Kullanıcı mesajını göster
+            var userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('message', 'user');
+            userMessageElement.textContent = message;
+            chatBox.appendChild(userMessageElement);
+            document.getElementById('message-box').value = '';
+
+            var formData = new FormData();
+            if (document.getElementById('photo-upload').files[0]) {
+                var file = document.getElementById('photo-upload').files[0];
+                formData.append('photo', file);
+            }
+            formData.append('message', message);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/send_photo', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Gemini API yanıtını göster
+                    var geminiResponseElement = document.createElement('div');
+                    geminiResponseElement.classList.add('message', 'gemini-response');
+                    geminiResponseElement.textContent = response.gemini_response;
+                    chatBox.appendChild(geminiResponseElement);
+
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            };
+            xhr.send(formData);
+
+            // Resim ön izlemeyi gizle
+            var preview = document.getElementById('image-preview');
+            preview.style.display = 'none';
+            preview.src = '#'; // Ön izleme alanını sıfırla
+
+            // Resim yükleme inputunu sıfırla
+            document.getElementById('photo-upload').value = '';
+        }
+
+    </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 # Google Gemini Math Teacher
  Math is easy with Google Gemini | Gemini API Developer Competition app
  
-> Replace with your own API Key ```GOOGLE_API_KEY= '<Your-API-KEY>'```
+> Replace with your own API Key  ```GOOGLE_API_KEY= '<Your-API-KEY>'```
 
 
-""Dependencies"" ``pip install  google-generativeai``
+>Dependencies ``pip install  google-generativeai``
 
 ### Using
 1. Go to [Google AI Studio](https://aistudio.google.com/).

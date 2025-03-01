@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Gemini API</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+
     <style>
         /* Ekstra stil tanımlamaları */
         #image-preview {
@@ -42,7 +44,7 @@
             if (message.trim() !== '' && !file) {
                 sendTextMessage(message);
             } else {
-                sendMessage(message);
+                sendMessage(message, file);
             }
         });
 
@@ -71,7 +73,7 @@
             // Kullanıcı mesajını göster
             var userMessageElement = document.createElement('div');
             userMessageElement.classList.add('message', 'user');
-            userMessageElement.textContent = message;
+            userMessageElement.innerHTML = marked.parse(message);
             chatBox.appendChild(userMessageElement);
             document.getElementById('message-box').value = '';
 
@@ -87,7 +89,7 @@
                     // Gemini API yanıtını göster
                     var geminiResponseElement = document.createElement('div');
                     geminiResponseElement.classList.add('message', 'gemini-response');
-                    geminiResponseElement.textContent = response.gemini_response;
+                    geminiResponseElement.innerHTML = marked.parse(response.gemini_response);
                     chatBox.appendChild(geminiResponseElement);
 
                     chatBox.scrollTop = chatBox.scrollHeight;
@@ -97,20 +99,25 @@
         }
 
         // Mesajı ve resmi gönderme fonksiyonu
-        function sendMessage(message) {
+        function sendMessage(message, file) {
             var chatBox = document.getElementById('chat-box');
             
             // Kullanıcı mesajını göster
             var userMessageElement = document.createElement('div');
             userMessageElement.classList.add('message', 'user');
-            userMessageElement.textContent = message;
+            userMessageElement.innerHTML = marked.parse(message);
             chatBox.appendChild(userMessageElement);
             document.getElementById('message-box').value = '';
 
             var formData = new FormData();
-            if (document.getElementById('photo-upload').files[0]) {
-                var file = document.getElementById('photo-upload').files[0];
+            if (file) {
                 formData.append('photo', file);
+
+                // Kullanıcı resmini göster
+                var userImageElement = document.createElement('img');
+                userImageElement.classList.add('message', 'user-image');
+                userImageElement.src = URL.createObjectURL(file);
+                chatBox.appendChild(userImageElement);
             }
             formData.append('message', message);
 
@@ -123,7 +130,7 @@
                     // Gemini API yanıtını göster
                     var geminiResponseElement = document.createElement('div');
                     geminiResponseElement.classList.add('message', 'gemini-response');
-                    geminiResponseElement.textContent = response.gemini_response;
+                    geminiResponseElement.innerHTML = marked.parse(response.gemini_response);
                     chatBox.appendChild(geminiResponseElement);
 
                     chatBox.scrollTop = chatBox.scrollHeight;

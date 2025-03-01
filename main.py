@@ -12,7 +12,7 @@ from IPython.display import Markdown
 
 
 
-GOOGLE_API_KEY= 'AIzaSyBPCqxr1MmUUyFzRR2zPaC2uM-Ku0tvohM'
+GOOGLE_API_KEY= '<APIKEY>'
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
